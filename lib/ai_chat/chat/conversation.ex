@@ -8,6 +8,7 @@ defmodule AiChat.Chat.Conversation do
     field :is_shared, :boolean, default: false
     field :share_token, :string
     field :metadata, :map, default: %{}
+    field :deleted_at, :utc_datetime
 
     belongs_to :user, User
     has_many :messages, AiChat.Chat.Message
@@ -18,7 +19,7 @@ defmodule AiChat.Chat.Conversation do
   @doc false
   def changeset(conversation, attrs) do
     conversation
-    |> cast(attrs, [:user_id, :title, :is_shared, :share_token, :metadata])
+    |> cast(attrs, [:user_id, :title, :is_shared, :share_token, :metadata, :deleted_at])
     |> validate_required([:user_id])
     |> unique_constraint(:share_token)
     |> foreign_key_constraint(:user_id)

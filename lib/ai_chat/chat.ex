@@ -10,19 +10,23 @@ defmodule AiChat.Chat do
   alias AiChat.Chat.Message
 
   @doc """
-  Returns the list of conversations for a user.
+  Returns the list of conversations for a user (excluding deleted ones).
   """
   def list_user_conversations(user_id) do
     Conversation
-    |> where([c], c.user_id == ^user_id)
+    |> where([c], c.user_id == ^user_id and is_nil(c.deleted_at))
     |> order_by([c], desc: c.updated_at)
     |> Repo.all()
   end
 
   @doc """
-  Gets a single conversation.
+  Gets a single conversation (excluding deleted ones).
   """
-  def get_conversation(id), do: Repo.get(Conversation, id)
+  def get_conversation(id) do
+    Conversation
+    |> where([c], c.id == ^id and is_nil(c.deleted_at))
+    |> Repo.one()
+  end
 
   @doc """
   Creates a conversation.
@@ -43,10 +47,12 @@ defmodule AiChat.Chat do
   end
 
   @doc """
-  Deletes a conversation.
+  Soft deletes a conversation by setting deleted_at timestamp.
   """
   def delete_conversation(%Conversation{} = conversation) do
-    Repo.delete(conversation)
+    conversation
+    |> Conversation.changeset(%{deleted_at: DateTime.utc_now()})
+    |> Repo.update()
   end
 
   def delete_conversation(id) when is_binary(id) or is_integer(id) do

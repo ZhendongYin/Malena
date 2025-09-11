@@ -45,6 +45,7 @@ defmodule AiChatWeb.AdminDashboardLive do
       total_messages = Analytics.get_total_messages()
       conversations_today = Analytics.get_conversations_today()
       messages_today = Analytics.get_messages_today()
+      currently_active_users = Analytics.get_currently_active_users()
 
       # Test recent activity
       recent_activity_data = Analytics.get_recent_activity()
@@ -60,6 +61,7 @@ defmodule AiChatWeb.AdminDashboardLive do
         total_messages: total_messages,
         conversations_today: conversations_today,
         messages_today: messages_today,
+        currently_active_users: currently_active_users,
         recent_activity: recent_activity,
         weekly_usage: weekly_usage
       }
@@ -75,6 +77,7 @@ defmodule AiChatWeb.AdminDashboardLive do
           total_messages: 0,
           conversations_today: 0,
           messages_today: 0,
+          currently_active_users: 0,
           recent_activity: [],
           weekly_usage: []
         }
@@ -85,8 +88,17 @@ defmodule AiChatWeb.AdminDashboardLive do
   # Format recent activity for display
   defp format_recent_activity(activities) do
     Enum.map(activities, fn activity ->
+      description = case activity do
+        %{type: "conversation", deleted_at: nil} ->
+          "#{activity.user_name} #{get_activity_description(activity.type)}"
+        %{type: "conversation", deleted_at: _deleted_at} ->
+          "#{activity.user_name} #{get_activity_description(activity.type)} (deleted)"
+        %{type: _other} ->
+          "#{activity.user_name} #{get_activity_description(activity.type)}"
+      end
+
       %{
-        description: "#{activity.user_name} #{get_activity_description(activity.type)}",
+        description: description,
         timestamp: format_timestamp(activity.created_at)
       }
     end)

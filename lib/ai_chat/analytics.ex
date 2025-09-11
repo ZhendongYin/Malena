@@ -65,27 +65,40 @@ defmodule AiChat.Analytics do
   end
 
   # Real-time metrics
-  defp get_active_users_today do
+  def get_active_users_today do
     today = Date.utc_today()
     start_of_day = DateTime.new!(today, ~T[00:00:00], "Etc/UTC")
     end_of_day = DateTime.new!(today, ~T[23:59:59], "Etc/UTC")
 
     from(u in AiChat.Accounts.User,
-      where: u.last_login_at >= ^start_of_day and u.last_login_at <= ^end_of_day
+      where: u.last_login_at >= ^start_of_day and u.last_login_at <= ^end_of_day and u.is_active == true
     )
     |> Repo.aggregate(:count)
   end
 
-  defp get_active_users_this_week do
+  def get_active_users_this_week do
     week_ago = DateTime.utc_now() |> DateTime.add(-7, :day)
 
     from(u in AiChat.Accounts.User,
-      where: u.last_login_at >= ^week_ago
+      where: u.last_login_at >= ^week_ago and u.is_active == true
+    )
+    |> Repo.aggregate(:count)
+  end
+
+  @doc """
+  Get the number of currently active users (logged in within the last 30 minutes).
+  """
+  def get_currently_active_users do
+    thirty_minutes_ago = DateTime.utc_now() |> DateTime.add(-30, :minute)
+
+    from(u in AiChat.Accounts.User,
+      where: u.last_login_at >= ^thirty_minutes_ago and u.is_active == true
     )
     |> Repo.aggregate(:count)
   end
 
   def get_total_conversations do
+    # Count all conversations including deleted ones
     from(c in AiChat.Chat.Conversation)
     |> Repo.aggregate(:count)
   end
@@ -95,6 +108,7 @@ defmodule AiChat.Analytics do
     start_of_day = DateTime.new!(today, ~T[00:00:00], "Etc/UTC")
     end_of_day = DateTime.new!(today, ~T[23:59:59], "Etc/UTC")
 
+    # Count conversations created today (including deleted ones)
     from(c in AiChat.Chat.Conversation,
       where: c.inserted_at >= ^start_of_day and c.inserted_at <= ^end_of_day
     )
@@ -160,7 +174,7 @@ defmodule AiChat.Analytics do
   Get recent activity for the dashboard.
   """
   def get_recent_activity(limit \\ 10) do
-    # Get recent conversations
+    # Get recent conversations (including deleted ones)
     recent_conversations =
       from(c in AiChat.Chat.Conversation,
         join: u in AiChat.Accounts.User, on: c.user_id == u.id,
@@ -171,7 +185,8 @@ defmodule AiChat.Analytics do
           id: c.id,
           title: c.title,
           user_name: u.name,
-          created_at: c.inserted_at
+          created_at: c.inserted_at,
+          deleted_at: c.deleted_at
         }
       )
       |> Repo.all()
@@ -216,7 +231,7 @@ defmodule AiChat.Analytics do
       )
       |> Repo.all()
 
-    # Conversations per day
+    # Conversations per day (including deleted ones)
     conversations_per_day =
       from(c in AiChat.Chat.Conversation,
         where: c.inserted_at >= ^week_ago,
