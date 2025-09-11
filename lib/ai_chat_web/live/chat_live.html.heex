@@ -135,7 +135,7 @@
                   <div :for={message <- @messages} class={"flex #{if message.role == "user", do: "justify-end", else: "justify-start"} #{if @is_streaming and message.role == "assistant" and message.id == @temp_ai_message_id, do: "hidden", else: ""}"}>
                     <div class={"max-w-[80%] px-4 py-3 rounded-2xl #{if message.role == "user", do: "bg-primary text-primary-content", else: "bg-base-100 text-base-content border border-base-300"}"}>
                       <!-- Think content for AI messages -->
-                      <div :if={message.role == "assistant" and (not is_binary(message.id) or String.starts_with?(message.id, "temp_") == false) and (Map.get(message.metadata || %{}, "think_content", "") != "" or @final_think_content != "")} class="mb-2 pb-2 border-b border-base-300">
+                      <div :if={message.role == "assistant" and (not is_binary(message.id) or String.starts_with?(message.id, "temp_") == false) and Map.get(message.metadata || %{}, "think_content", "") != ""} class="mb-2 pb-2 border-b border-base-300">
                         <div class="flex items-center justify-between mb-2">
                           <div class="flex items-center space-x-2">
                             <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -152,12 +152,10 @@
                         </div>
                         <div :if={@show_think_content} class="text-xs text-base-content/70  font-mono leading-relaxed">
                           <%= cond do %>
-                            <% @is_streaming -> %>
+                            <% @is_streaming and message.id == @temp_ai_message_id -> %>
                               <%= @streaming_think_content %>
-                            <% (not is_binary(message.id) or String.starts_with?(message.id, "temp_") == false) and Map.get(message.metadata || %{}, "think_content", "") != "" -> %>
-                              <%= Map.get(message.metadata, "think_content") %>
                             <% true -> %>
-                              <%= @final_think_content %>
+                              <%= Map.get(message.metadata, "think_content") %>
                           <% end %>
                         </div>
                       </div>
@@ -185,7 +183,7 @@
                   <div :if={@is_streaming and @streaming_content != ""} class="flex justify-start">
                     <div class="max-w-[80%] px-4 py-3 rounded-2xl bg-base-100 text-base-content border border-base-300">
                       <!-- Think content for streaming -->
-                      <div :if={@streaming_think_content != "" or @final_think_content != ""} class="mb-2 pb-2 border-b border-base-300">
+                      <div :if={@streaming_think_content != ""} class="mb-2 pb-2 border-b border-base-300">
                         <div class="flex items-center justify-between mb-2">
                           <div class="flex items-center space-x-2">
                             <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,7 +199,7 @@
                           </button>
                         </div>
                         <div :if={@show_think_content} class="text-xs text-base-content/70  font-mono leading-relaxed">
-                          <%= if @streaming_think_content != "", do: @streaming_think_content, else: @final_think_content %>
+                          <%= @streaming_think_content %>
                         </div>
                       </div>
                       

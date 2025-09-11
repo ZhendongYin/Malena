@@ -548,6 +548,8 @@ defmodule AiChatWeb.ChatLive do
            |> assign(:messages, final_messages)
            |> assign(:is_streaming, false)
            |> assign(:streaming_content, "")
+           |> assign(:streaming_think_content, "")
+           |> assign(:final_think_content, "")
            |> assign(:temp_ai_message_id, nil)}
 
         {:error, _changeset} ->
@@ -561,6 +563,8 @@ defmodule AiChatWeb.ChatLive do
            |> assign(:messages, messages_without_temp)
            |> assign(:is_streaming, false)
            |> assign(:streaming_content, "")
+           |> assign(:streaming_think_content, "")
+           |> assign(:final_think_content, "")
            |> assign(:temp_ai_message_id, nil)
            |> put_flash(:error, "Failed to save AI response")}
       end
@@ -583,6 +587,8 @@ defmodule AiChatWeb.ChatLive do
        |> assign(:messages, messages_without_temp)
        |> assign(:is_streaming, false)
        |> assign(:streaming_content, "")
+       |> assign(:streaming_think_content, "")
+       |> assign(:final_think_content, "")
        |> assign(:temp_ai_message_id, nil)
        |> put_flash(:error, "Streaming error: #{error}")}
     else
