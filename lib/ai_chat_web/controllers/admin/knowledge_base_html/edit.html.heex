@@ -1,0 +1,180 @@
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6 flex justify-end">
+    <.link
+      href={~p"/admin/knowledge-bases"}
+      class="btn btn-sm btn-outline border-base-content"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Knowledge Bases
+    </.link>
+  </div>
+
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        </svg>
+        Edit Knowledge Base
+      </h2>
+
+      <.form 
+        for={@changeset} 
+        action={~p"/admin/knowledge-bases/#{@knowledge_base.id}"} 
+        method="put"
+        class="space-y-4"
+        autocomplete="off"
+      >
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Name <span class="text-error">*</span></span>
+          </label>
+          <input
+            id="knowledge_base_name"
+            name="knowledge_base[name]"
+            type="text"
+            value={@knowledge_base.name}
+            required
+            autocomplete="off"
+            class="input input-bordered w-full"
+            placeholder="Enter knowledge base name"
+          />
+          <p :if={@changeset.errors[:name]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:name], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Description</span>
+          </label>
+          <textarea
+            id="knowledge_base_description"
+            name="knowledge_base[description]"
+            class="textarea textarea-bordered w-full"
+            placeholder="Enter knowledge base description"
+            rows="3"
+          ><%= @knowledge_base.description || "" %></textarea>
+          <p :if={@changeset.errors[:description]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:description], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Current File</span>
+          </label>
+          <div class="p-3 bg-base-300 rounded-lg">
+            <p class="text-sm"><strong>File:</strong> <%= @knowledge_base.file_path %></p>
+            <p class="text-sm"><strong>Type:</strong> <%= @knowledge_base.file_type %></p>
+            <p class="text-sm"><strong>Size:</strong> <%= @knowledge_base.file_size %> bytes</p>
+            <p class="text-sm"><strong>Status:</strong> <%= @knowledge_base.processing_status %></p>
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Departments</span>
+          </label>
+          <div class="grid grid-cols-2 gap-2 p-4 border border-base-300 rounded-lg max-h-32 overflow-y-auto">
+            <label :for={dept <- @departments} class="label cursor-pointer">
+              <span class="label-text text-sm"><%= dept.name %></span>
+              <input
+                type="checkbox"
+                name="knowledge_base[department_ids][]"
+                value={dept.id}
+                checked={dept.id in (@knowledge_base.department_ids || [])}
+                class="checkbox checkbox-primary checkbox-sm"
+              />
+            </label>
+          </div>
+          <p class="text-sm text-base-content/70 mt-1">Select one or more departments</p>
+          <p :if={@changeset.errors[:department_ids]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:department_ids], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Roles</span>
+          </label>
+          <div class="grid grid-cols-2 gap-2 p-4 border border-base-300 rounded-lg max-h-32 overflow-y-auto">
+            <label :for={role <- @roles} class="label cursor-pointer">
+              <span class="label-text text-sm"><%= role.name %></span>
+              <input
+                type="checkbox"
+                name="knowledge_base[role_ids][]"
+                value={role.id}
+                checked={role.id in (@knowledge_base.role_ids || [])}
+                class="checkbox checkbox-primary checkbox-sm"
+              />
+            </label>
+          </div>
+          <p class="text-sm text-base-content/70 mt-1">Select one or more roles</p>
+          <p :if={@changeset.errors[:role_ids]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:role_ids], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <span class="label-text">API Accessible</span>
+            <input
+              id="knowledge_base_api_accessible"
+              name="knowledge_base[api_accessible]"
+              type="checkbox"
+              value="true"
+              checked={@knowledge_base.api_accessible}
+              class="toggle toggle-primary"
+            />
+          </label>
+          <p :if={@changeset.errors[:api_accessible]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:api_accessible], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <span class="label-text">Active</span>
+            <input
+              type="hidden"
+              name="knowledge_base[is_active]"
+              value="false"
+            />
+            <input
+              id="knowledge_base_is_active"
+              name="knowledge_base[is_active]"
+              type="checkbox"
+              value="true"
+              checked={@knowledge_base.is_active}
+              class="toggle toggle-primary"
+            />
+          </label>
+          <p :if={@changeset.errors[:is_active]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:is_active], 0) %>
+          </p>
+        </div>
+
+        <div class="card-actions justify-end">
+          <.link 
+            href={~p"/admin/knowledge-bases"} 
+            class="btn btn-sm btn-outline border-base-content"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            Cancel
+          </.link>
+          <button type="submit" class="btn btn-sm btn-primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Update Knowledge Base
+          </button>
+        </div>
+      </.form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,164 @@
+<!-- Page Header with Refresh Button -->
+<div class="sm:flex sm:items-center">
+  <div class="sm:flex-auto">
+    <h1 class="text-2xl font-semibold text-base-content">Admin Dashboard</h1>
+    <p class="mt-2 text-sm text-base-content/80">
+      Overview of system statistics and recent activity.
+    </p>
+  </div>
+  <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+    <button 
+      phx-click="refresh" 
+      class="btn btn-outline btn-sm"
+      title="Refresh dashboard data"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<!-- Real-time Status Indicator -->
+<div class="mt-4">
+  <div class="flex items-center text-sm text-base-content/70">
+    <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+    Live updates enabled
+  </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+  <!-- Total Users -->
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-base-content/70 truncate">Total Users</dt>
+            <dd class="text-lg font-medium text-base-content"><%= @stats.total_users %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Conversations -->
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-base-content/70 truncate">Total Conversations</dt>
+            <dd class="text-lg font-medium text-base-content"><%= @stats.total_conversations %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Messages -->
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-base-content/70 truncate">Total Messages</dt>
+            <dd class="text-lg font-medium text-base-content"><%= @stats.total_messages %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Today's Activity -->
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-base-content/70 truncate">Today's Activity</dt>
+            <dd class="text-lg font-medium text-base-content">
+              <%= @stats.conversations_today %> conv, <%= @stats.messages_today %> msgs
+            </dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity and Weekly Usage -->
+<div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+  <!-- Recent Activity -->
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <h3 class="text-lg font-medium text-base-content mb-4">Recent Activity</h3>
+      <div class="space-y-3">
+        <%= if length(@stats.recent_activity) > 0 do %>
+          <div :for={activity <- @stats.recent_activity} class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+              <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-base-content"><%= activity.description %></p>
+              <p class="text-xs text-base-content/70"><%= activity.timestamp %></p>
+            </div>
+          </div>
+        <% else %>
+          <p class="text-sm text-base-content/70">No recent activity</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Usage Stats -->
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <h3 class="text-lg font-medium text-base-content mb-4">Weekly Usage</h3>
+      <div class="space-y-3">
+        <%= if length(@stats.weekly_usage) > 0 do %>
+          <div :for={day <- @stats.weekly_usage} class="flex items-center justify-between">
+            <span class="text-sm text-base-content"><%= day.date %></span>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-base-content/70"><%= day.conversations %> conv</span>
+              <span class="text-sm text-base-content/70"><%= day.messages %> msgs</span>
+            </div>
+          </div>
+        <% else %>
+          <p class="text-sm text-base-content/70">No usage data available</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+

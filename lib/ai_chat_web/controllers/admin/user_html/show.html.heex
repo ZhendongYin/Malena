@@ -1,0 +1,103 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+      <.link 
+        href={~p"/admin/users"} 
+        class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+      >
+        ← Back to Users
+      </.link>
+    </div>
+
+    <div class="bg-white shadow sm:rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex justify-between items-start mb-6">
+          <div class="flex items-center">
+            <%= if @user.avatar_url do %>
+              <img class="h-16 w-16 rounded-full" src={@user.avatar_url} alt={@user.name} />
+            <% else %>
+              <div class="h-16 w-16 rounded-full bg-gray-300 flex items-center justify-center">
+                <span class="text-xl font-medium text-gray-700">
+                  <%= String.first(@user.name) %>
+                </span>
+              </div>
+            <% end %>
+            <div class="ml-4">
+              <h1 class="text-2xl font-bold text-gray-900"><%= @user.name %></h1>
+              <p class="text-gray-600"><%= @user.email %></p>
+              <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2 #{if @user.is_active, do: "bg-green-100 text-green-800", else: "bg-red-100 text-red-800"}"}>
+                <%= if @user.is_active, do: "Active", else: "Inactive" %>
+              </span>
+            </div>
+          </div>
+          <div class="flex space-x-3">
+            <.link 
+              href={~p"/admin/users/#{@user.id}/edit"} 
+              class="btn btn-primary"
+            >
+              Edit User
+            </.link>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div class="bg-gray-50 px-4 py-5 sm:rounded-lg">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">User Information</h3>
+            <dl class="space-y-3">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Name</dt>
+                <dd class="text-sm text-gray-900"><%= @user.name %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Email</dt>
+                <dd class="text-sm text-gray-900"><%= @user.email %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                <dd class="text-sm text-gray-900">
+                  <%= if @user.is_active, do: "Active", else: "Inactive" %>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Last Login</dt>
+                <dd class="text-sm text-gray-900">
+                  <%= if @user.last_login_at do %>
+                    <%= Calendar.strftime(@user.last_login_at, "%B %d, %Y at %I:%M %p") %>
+                  <% else %>
+                    Never
+                  <% end %>
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="bg-gray-50 px-4 py-5 sm:rounded-lg">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Organization</h3>
+            <dl class="space-y-3">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Department</dt>
+                <dd class="text-sm text-gray-900"><%= @user.department.name %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Role</dt>
+                <dd class="text-sm text-gray-900"><%= @user.role.name %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Created</dt>
+                <dd class="text-sm text-gray-900">
+                  <%= Calendar.strftime(@user.inserted_at, "%B %d, %Y at %I:%M %p") %>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                <dd class="text-sm text-gray-900">
+                  <%= Calendar.strftime(@user.updated_at, "%B %d, %Y at %I:%M %p") %>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

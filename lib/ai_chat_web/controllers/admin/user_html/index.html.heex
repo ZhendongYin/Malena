@@ -1,0 +1,73 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Users</h1>
+    <.link 
+      href={~p"/admin/users/new"} 
+      class="btn btn-primary"
+    >
+      Add New User
+    </.link>
+  </div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <ul class="divide-y divide-gray-200">
+      <%= for user <- @users do %>
+        <li>
+          <div class="px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <%= if user.avatar_url do %>
+                  <img class="h-10 w-10 rounded-full" src={user.avatar_url} alt={user.name} />
+                <% else %>
+                  <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                    <span class="text-sm font-medium text-gray-700">
+                      <%= String.first(user.name) %>
+                    </span>
+                  </div>
+                <% end %>
+              </div>
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900">
+                  <%= user.name %>
+                </div>
+                <div class="text-sm text-gray-500">
+                  <%= user.email %>
+                </div>
+                <div class="text-sm text-gray-500">
+                  <%= user.role.name %> • <%= user.department.name %>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{if user.is_active, do: "bg-green-100 text-green-800", else: "bg-red-100 text-red-800"}"}>
+                <%= if user.is_active, do: "Active", else: "Inactive" %>
+              </span>
+              <div class="flex space-x-2">
+                <.link 
+                  href={~p"/admin/users/#{user.id}"} 
+                  class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                >
+                  View
+                </.link>
+                <.link 
+                  href={~p"/admin/users/#{user.id}/edit"} 
+                  class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                >
+                  Edit
+                </.link>
+                <.link 
+                  href={~p"/admin/users/#{user.id}"} 
+                  method="delete" 
+                  data-confirm="Are you sure?"
+                  class="text-red-600 hover:text-red-900 text-sm font-medium"
+                >
+                  Delete
+                </.link>
+              </div>
+            </div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>

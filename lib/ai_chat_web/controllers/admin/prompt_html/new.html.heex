@@ -1,0 +1,167 @@
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6 flex justify-end">
+    <.link
+      href={~p"/admin/prompts"}
+      class="btn btn-sm btn-outline border-base-content"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Prompts
+    </.link>
+  </div>
+
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Create New Prompt
+      </h2>
+
+      <.form 
+        for={@changeset} 
+        action={~p"/admin/prompts"} 
+        method="post"
+        class="space-y-4"
+        autocomplete="off"
+      >
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Title <span class="text-error">*</span></span>
+          </label>
+          <input
+            id="prompt_title"
+            name="prompt[title]"
+            type="text"
+            value={@changeset.data.title || ""}
+            required
+            autocomplete="off"
+            class="input input-bordered w-full"
+            placeholder="Enter prompt title"
+          />
+          <p :if={@changeset.errors[:title]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:title], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Content <span class="text-error">*</span></span>
+          </label>
+          <textarea
+            id="prompt_content"
+            name="prompt[content]"
+            class="textarea textarea-bordered w-full"
+            placeholder="Enter prompt content"
+            rows="6"
+            required
+          ><%= @changeset.data.content || "" %></textarea>
+          <p :if={@changeset.errors[:content]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:content], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Departments</span>
+          </label>
+          <div class="grid grid-cols-2 gap-2 p-4 border border-base-300 rounded-lg max-h-32 overflow-y-auto">
+            <label :for={dept <- @departments} class="label cursor-pointer">
+              <span class="label-text text-sm"><%= dept.name %></span>
+              <input
+                type="checkbox"
+                name="prompt[department_ids][]"
+                value={dept.id}
+                class="checkbox checkbox-primary checkbox-sm"
+              />
+            </label>
+          </div>
+          <p class="text-sm text-base-content/70 mt-1">Select one or more departments</p>
+          <p :if={@changeset.errors[:department_ids]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:department_ids], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Roles</span>
+          </label>
+          <div class="grid grid-cols-2 gap-2 p-4 border border-base-300 rounded-lg max-h-32 overflow-y-auto">
+            <label :for={role <- @roles} class="label cursor-pointer">
+              <span class="label-text text-sm"><%= role.name %></span>
+              <input
+                type="checkbox"
+                name="prompt[role_ids][]"
+                value={role.id}
+                class="checkbox checkbox-primary checkbox-sm"
+              />
+            </label>
+          </div>
+          <p class="text-sm text-base-content/70 mt-1">Select one or more roles</p>
+          <p :if={@changeset.errors[:role_ids]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:role_ids], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <span class="label-text">API Accessible</span>
+            <input
+              id="prompt_api_accessible"
+              name="prompt[api_accessible]"
+              type="checkbox"
+              value="true"
+              checked={@changeset.data.api_accessible}
+              class="toggle toggle-primary"
+            />
+          </label>
+          <p :if={@changeset.errors[:api_accessible]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:api_accessible], 0) %>
+          </p>
+        </div>
+
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <span class="label-text">Active</span>
+            <input
+              type="hidden"
+              name="prompt[is_active]"
+              value="false"
+            />
+            <input
+              id="prompt_is_active"
+              name="prompt[is_active]"
+              type="checkbox"
+              value="true"
+              checked={@changeset.data.is_active}
+              class="toggle toggle-primary"
+            />
+          </label>
+          <p :if={@changeset.errors[:is_active]} class="text-error text-sm mt-1">
+            <%= elem(@changeset.errors[:is_active], 0) %>
+          </p>
+        </div>
+
+        <div class="card-actions justify-end">
+          <.link 
+            href={~p"/admin/prompts"} 
+            class="btn btn-sm btn-outline border-base-content"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            Cancel
+          </.link>
+          <button type="submit" class="btn btn-sm btn-primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Create Prompt
+          </button>
+        </div>
+      </.form>
+    </div>
+  </div>
+</div>

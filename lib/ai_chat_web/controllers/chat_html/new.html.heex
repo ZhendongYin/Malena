@@ -1,0 +1,107 @@
+<div class="min-h-screen bg-base-100">
+  <!-- Navigation -->
+  <nav class="bg-base-200 border-b border-base-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <h1 class="text-xl font-bold text-base-content">AI Chat</h1>
+          </div>
+          <div class="ml-10 flex items-baseline space-x-4">
+            <.link
+              href={~p"/chat"}
+              class="btn btn-primary btn-sm"
+            >
+              Chat
+            </.link>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <!-- Theme Toggle -->
+          <.theme_toggle />
+          
+          <div class="text-sm text-base-content">
+            Welcome, <span class="font-medium"><%= @current_user.name %></span>
+          </div>
+          <.link
+            href={~p"/logout"}
+            method="delete"
+            class="btn btn-error btn-sm"
+          >
+            Sign Out
+          </.link>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+      <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+          <h1 class="text-2xl font-semibold text-base-content">New Conversation</h1>
+          <p class="mt-2 text-sm text-base-content/80">
+            Start a new conversation with AI.
+          </p>
+        </div>
+        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <.link
+            href={~p"/chat"}
+            class="btn btn-outline"
+          >
+            Back to Conversations
+          </.link>
+        </div>
+      </div>
+      
+      <div class="mt-8">
+        <div class="card bg-base-200 shadow-xl">
+          <div class="px-4 py-5 sm:p-6">
+            <.form for={@changeset} action={~p"/chat"} method="post" class="space-y-6">
+              <div>
+                <label for="conversation_title" class="label">
+                  <span class="label-text text-base-content">
+                  Conversation Title (Optional)
+                  </span>
+                </label>
+                <div class="form-control">
+                  <input
+                    type="text"
+                    name="conversation[title]"
+                    id="conversation_title"
+                    value={get_in(@changeset.changes, [:title]) || @changeset.data.title || ""}
+                    class="input input-bordered w-full bg-base-100 text-base-content placeholder-base-content/50"
+                    placeholder="e.g., Project Discussion, Help with Code"
+                  />
+                </div>
+                <p class="mt-2 text-sm text-base-content/70">
+                  Give your conversation a title to help you find it later. If left blank, a default title will be generated.
+                </p>
+                <p :if={@changeset.errors[:title]} class="mt-2 text-sm text-error">
+                  <%= elem(@changeset.errors[:title], 0) %>
+                </p>
+              </div>
+
+              <div class="flex justify-end space-x-3">
+                <.link
+                  href={~p"/chat"}
+                  class="btn btn-outline"
+                >
+                  Cancel
+                </.link>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                >
+                  Start Conversation
+                </button>
+              </div>
+            </.form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title default="AiChat" suffix=" · Phoenix Framework">
+      {assigns[:page_title]}
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
+    </script>
+    <script>
+      (() => {
+        const getSystemTheme = () => {
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        };
+
+        const setTheme = (theme) => {
+          if (theme === "system") {
+            localStorage.setItem("phx:theme", "system");
+            document.documentElement.setAttribute("data-theme", "system");
+            // Apply the actual system theme for styling
+            const systemTheme = getSystemTheme();
+            document.documentElement.style.setProperty('--actual-theme', systemTheme);
+          } else {
+            localStorage.setItem("phx:theme", theme);
+            document.documentElement.setAttribute("data-theme", theme);
+            document.documentElement.style.removeProperty('--actual-theme');
+          }
+        };
+
+        const initializeTheme = () => {
+          const savedTheme = localStorage.getItem("phx:theme");
+          if (savedTheme) {
+            setTheme(savedTheme);
+          } else {
+            setTheme("system");
+          }
+        };
+
+        // Initialize theme on page load
+        initializeTheme();
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+          const currentTheme = localStorage.getItem("phx:theme");
+          if (currentTheme === "system") {
+            // Keep data-theme as "system" for button selection, update actual theme
+            const systemTheme = getSystemTheme();
+            document.documentElement.style.setProperty('--actual-theme', systemTheme);
+          }
+        });
+
+        // Listen for storage changes
+        window.addEventListener("storage", (e) => {
+          if (e.key === "phx:theme") {
+            setTheme(e.newValue || "system");
+          }
+        });
+        
+        // Listen for theme toggle clicks
+        window.addEventListener("phx:set-theme", (e) => setTheme(e.target.dataset.phxTheme));
+      })();
+    </script>
+  </head>
+  <body>
+    {@inner_content}
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<div class="min-h-screen bg-base-100">
+  <!-- Navigation -->
+  <nav class="bg-base-200 border-b border-base-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <.link
+            href={~p"/"}
+            class="flex items-center space-x-2 text-base-content hover:text-primary"
+          >
+            <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-xl font-bold">AI Chat</span>
+          </.link>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <!-- Theme Toggle -->
+          <.theme_toggle />
+          
+          <!-- User Menu -->
+          <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+              <div class="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center">
+                <span class="text-sm font-medium">
+                  <%= String.first(@current_user.name) %>
+                </span>
+              </div>
+            </div>
+            <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow border border-base-300">
+              <li :if={@current_user.role.name == "Super Admin"}>
+                <.link href={~p"/admin/dashboard"} class="text-base-content">
+                  Admin Panel
+                </.link>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <.link
+                  href={~p"/logout"}
+                  method="delete"
+                  class="text-error"
+                >
+                  Sign Out
+                </.link>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+      {@inner_content}
+    </div>
+  </main>
+
+  <!-- Flash Messages -->
+  <.flash_group flash={@flash} />
+</div>

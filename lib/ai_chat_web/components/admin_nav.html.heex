@@ -1,0 +1,75 @@
+<!-- Admin Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-base-200 border-b border-base-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <h1 class="text-xl font-bold text-base-content">AI Chat Admin</h1>
+        </div>
+        <div class="ml-10 flex items-baseline space-x-4">
+          <.link
+            href={~p"/admin/dashboard"}
+            class={if @current_page == "dashboard", do: "btn btn-primary btn-sm", else: "btn btn-ghost btn-sm"}
+          >
+            Dashboard
+          </.link>
+          <.link
+            href={~p"/admin/users"}
+            class={if @current_page == "users", do: "btn btn-primary btn-sm", else: "btn btn-ghost btn-sm"}
+          >
+            Users
+          </.link>
+          <.link
+            href={~p"/admin/departments"}
+            class={if @current_page == "departments", do: "btn btn-primary btn-sm", else: "btn btn-ghost btn-sm"}
+          >
+            Departments
+          </.link>
+          <.link
+            href={~p"/admin/roles"}
+            class={if @current_page == "roles", do: "btn btn-primary btn-sm", else: "btn btn-ghost btn-sm"}
+          >
+            Roles
+          </.link>
+          <.link
+            href={~p"/admin/prompts"}
+            class={if @current_page == "prompts", do: "btn btn-primary btn-sm", else: "btn btn-ghost btn-sm"}
+          >
+            Prompts
+          </.link>
+          <.link
+            href={~p"/admin/knowledge-bases"}
+            class={if @current_page == "knowledge-bases", do: "btn btn-primary btn-sm", else: "btn btn-ghost btn-sm"}
+          >
+            Knowledge Bases
+          </.link>
+          <.link
+            href={~p"/admin/ai-apis"}
+            class={if @current_page == "ai-apis", do: "btn btn-primary btn-sm", else: "btn btn-ghost btn-sm"}
+          >
+            AI APIs
+          </.link>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-4">
+        <!-- Theme Toggle -->
+        <.theme_toggle />
+        
+        <div class="text-sm text-base-content">
+          Welcome, <span class="font-medium"><%= @user.name %></span>
+        </div>
+        <div class="text-xs text-base-content/70">
+          <%= @user.department.name %> • <%= @user.role.name %>
+        </div>
+        <.link
+          href={~p"/logout"}
+          method="delete"
+          class="btn btn-error btn-sm"
+        >
+          Sign Out
+        </.link>
+      </div>
+    </div>
+  </div>
+</nav>
