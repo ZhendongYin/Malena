@@ -12,6 +12,8 @@ defmodule AiChat.Application do
       AiChat.Repo,
       {DNSCluster, query: Application.get_env(:ai_chat, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AiChat.PubSub},
+      # Redis connection
+      {AiChat.Redis, Application.get_env(:ai_chat, AiChat.Redis, [])},
       # Start a worker by calling: AiChat.Worker.start_link(arg)
       # {AiChat.Worker, arg},
       # Start to serve requests, typically the last entry

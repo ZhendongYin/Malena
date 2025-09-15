@@ -55,6 +55,23 @@ if config_env() == :prod do
 
   config :ai_chat, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
+  # Redis configuration
+  redis_url = System.get_env("REDIS_URL") || "redis://redis:6379"
+
+  config :ai_chat, :redis,
+    url: redis_url,
+    pool_size: 20,
+    pool_timeout: 5000,
+    timeout: 5000
+
+  # Configure Redix for Redis connection
+  config :ai_chat, AiChat.Redis,
+    host: System.get_env("REDIS_HOST", "redis"),
+    port: String.to_integer(System.get_env("REDIS_PORT", "6379")),
+    password: System.get_env("REDIS_PASSWORD"),
+    database: 0,
+    timeout: 5000
+
   config :ai_chat, AiChatWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [

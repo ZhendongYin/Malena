@@ -1,0 +1,12 @@
+{
+  "name": "ai_chat_assets",
+  "version": "1.0.0",
+  "description": "Assets for AI Chat System",
+  "scripts": {
+    "build": "tailwindcss --input=css/app.css --output=../priv/static/assets/css/app.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "daisyui": "^4.0.0"
+  }
+}

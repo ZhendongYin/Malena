@@ -34,10 +34,27 @@ defmodule AiChatWeb.AdminLive do
       Phoenix.PubSub.subscribe(AiChat.PubSub, "admin_updates")
     end
 
-    # Don't set default current_page here - let handle_params handle it
+    # Set default values to prevent render errors
     socket = assign(socket, :action, :index)
+    socket = assign(socket, :current_page, "users")
     socket = assign(socket, :form, nil)
     socket = assign(socket, :editing_item, nil)
+
+    # Set empty default data to prevent render errors
+    socket = assign(socket, :users, [])
+    socket = assign(socket, :departments, [])
+    socket = assign(socket, :roles, [])
+    socket = assign(socket, :prompts, [])
+    socket = assign(socket, :knowledge_bases, [])
+    socket = assign(socket, :ai_apis, [])
+
+    # Set default dashboard counts to prevent render errors
+    socket = assign(socket, :users_count, 0)
+    socket = assign(socket, :departments_count, 0)
+    socket = assign(socket, :roles_count, 0)
+    socket = assign(socket, :prompts_count, 0)
+    socket = assign(socket, :knowledge_bases_count, 0)
+    socket = assign(socket, :ai_apis_count, 0)
 
     {:ok, socket, layout: {AiChatWeb.Layouts, :admin}}
   end
@@ -46,6 +63,8 @@ defmodule AiChatWeb.AdminLive do
   def handle_params(_params, url, socket) do
     # Extract current page and action from URL path
     {current_page, action} = case URI.parse(url).path do
+      "/admin" -> {"dashboard", :index}
+      "/admin/dashboard" -> {"dashboard", :index}
       "/admin/users" -> {"users", :index}
       "/admin/users/new" -> {"users", :new}
       "/admin/departments" -> {"departments", :index}
@@ -113,7 +132,7 @@ defmodule AiChatWeb.AdminLive do
         {:noreply,
          socket
          |> put_flash(:info, "Item saved successfully.")
-         |> push_patch(to: ~p"/admin/#{socket.assigns.current_page}")}
+         |> push_patch(to: get_index_path(socket.assigns.current_page))}
 
       {:error, changeset} ->
         {:noreply, assign(socket, :form, changeset)}
@@ -178,6 +197,7 @@ defmodule AiChatWeb.AdminLive do
   # Helper functions
   defp load_data_for_index(socket, page) do
     case page do
+      "dashboard" -> load_dashboard_data(socket)
       "users" -> load_users(socket)
       "departments" -> load_departments(socket)
       "roles" -> load_roles(socket)
@@ -199,6 +219,24 @@ defmodule AiChatWeb.AdminLive do
     socket
     |> assign(:form, form)
     |> assign(:editing_item, item)
+  end
+
+  defp load_dashboard_data(socket) do
+    # Load summary data for dashboard
+    users_count = Accounts.list_users() |> length()
+    departments_count = Organizations.list_departments() |> length()
+    roles_count = Organizations.list_roles() |> length()
+    prompts_count = Prompts.list_prompts() |> length()
+    knowledge_bases_count = KnowledgeBases.list_knowledge_bases() |> length()
+    ai_apis_count = AiApis.list_ai_apis() |> length()
+
+    socket
+    |> assign(:users_count, users_count)
+    |> assign(:departments_count, departments_count)
+    |> assign(:roles_count, roles_count)
+    |> assign(:prompts_count, prompts_count)
+    |> assign(:knowledge_bases_count, knowledge_bases_count)
+    |> assign(:ai_apis_count, ai_apis_count)
   end
 
   defp load_users(socket) do
@@ -413,7 +451,7 @@ defmodule AiChatWeb.AdminLive do
                 Refresh
               </button>
               <.link
-                href={~p"/admin/#{@current_page}/new"}
+                href={get_new_path(@current_page)}
                 class="btn btn-primary"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -434,7 +472,11 @@ defmodule AiChatWeb.AdminLive do
         </div>
 
         <div class="mt-8">
-          <%= render_table(@current_page, assigns) %>
+          <%= if @current_page == "dashboard" do %>
+            <%= render_dashboard(assigns) %>
+          <% else %>
+            <%= render_table(@current_page, assigns) %>
+          <% end %>
         </div>
       <% else %>
         <!-- Form view -->
@@ -485,7 +527,7 @@ defmodule AiChatWeb.AdminLive do
                 <% end %>
 
                 <div class="card-actions justify-end">
-                  <.link href={~p"/admin/#{@current_page}"} class="btn btn-ghost">
+                  <.link href={get_index_path(@current_page)} class="btn btn-ghost">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -519,6 +561,120 @@ defmodule AiChatWeb.AdminLive do
     end
   end
 
+  defp render_dashboard(assigns) do
+    ~H"""
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Users Card -->
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-base-content">Users</h3>
+              <p class="text-3xl font-bold text-primary"><%= @users_count %></p>
+            </div>
+            <div class="text-primary">
+              <.icon name="hero-users" class="h-8 w-8" />
+            </div>
+          </div>
+          <.link href={~p"/admin/users"} class="btn btn-sm btn-outline mt-2">
+            View Users
+          </.link>
+        </div>
+      </div>
+
+      <!-- Departments Card -->
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-base-content">Departments</h3>
+              <p class="text-3xl font-bold text-secondary"><%= @departments_count %></p>
+            </div>
+            <div class="text-secondary">
+              <.icon name="hero-building-office-2" class="h-8 w-8" />
+            </div>
+          </div>
+          <.link href={~p"/admin/departments"} class="btn btn-sm btn-outline mt-2">
+            View Departments
+          </.link>
+        </div>
+      </div>
+
+      <!-- Roles Card -->
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-base-content">Roles</h3>
+              <p class="text-3xl font-bold text-accent"><%= @roles_count %></p>
+            </div>
+            <div class="text-accent">
+              <.icon name="hero-shield-check" class="h-8 w-8" />
+            </div>
+          </div>
+          <.link href={~p"/admin/roles"} class="btn btn-sm btn-outline mt-2">
+            View Roles
+          </.link>
+        </div>
+      </div>
+
+      <!-- Prompts Card -->
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-base-content">Prompts</h3>
+              <p class="text-3xl font-bold text-info"><%= @prompts_count %></p>
+            </div>
+            <div class="text-info">
+              <.icon name="hero-chat-bubble-left-right" class="h-8 w-8" />
+            </div>
+          </div>
+          <.link href={~p"/admin/prompts"} class="btn btn-sm btn-outline mt-2">
+            View Prompts
+          </.link>
+        </div>
+      </div>
+
+      <!-- Knowledge Bases Card -->
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-base-content">Knowledge Bases</h3>
+              <p class="text-3xl font-bold text-success"><%= @knowledge_bases_count %></p>
+            </div>
+            <div class="text-success">
+              <.icon name="hero-book-open" class="h-8 w-8" />
+            </div>
+          </div>
+          <.link href={~p"/admin/knowledge-bases"} class="btn btn-sm btn-outline mt-2">
+            View Knowledge Bases
+          </.link>
+        </div>
+      </div>
+
+      <!-- AI APIs Card -->
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-base-content">AI APIs</h3>
+              <p class="text-3xl font-bold text-warning"><%= @ai_apis_count %></p>
+            </div>
+            <div class="text-warning">
+              <.icon name="hero-cpu-chip" class="h-8 w-8" />
+            </div>
+          </div>
+          <.link href={~p"/admin/ai-apis"} class="btn btn-sm btn-outline mt-2">
+            View AI APIs
+          </.link>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   defp render_table(page, assigns) do
     case page do
       "users" -> render_users_table(assigns)
@@ -548,7 +704,7 @@ defmodule AiChatWeb.AdminLive do
               </tr>
             </thead>
             <tbody>
-              <tr :for={user <- @users} id={"user-#{user.id}"}>
+              <tr :for={user <- (@users || [])} id={"user-#{user.id}"}>
                 <td><%= user.name %></td>
                 <td><%= user.email %></td>
                 <td><%= if user.department, do: user.department.name, else: "No Department" %></td>
@@ -604,7 +760,7 @@ defmodule AiChatWeb.AdminLive do
               </tr>
             </thead>
             <tbody>
-              <tr :for={api <- @ai_apis} id={"ai_api-#{api.id}"}>
+              <tr :for={api <- (@ai_apis || [])} id={"ai_api-#{api.id}"}>
                 <td><%= api.name %></td>
                 <td><%= api.provider %></td>
                 <td><%= api.model_name %></td>
@@ -661,7 +817,7 @@ defmodule AiChatWeb.AdminLive do
               </tr>
             </thead>
             <tbody>
-              <tr :for={dept <- @departments} id={"department-#{dept.id}"}>
+              <tr :for={dept <- (@departments || [])} id={"department-#{dept.id}"}>
                 <td><%= dept.name %></td>
                 <td><%= dept.description %></td>
                 <td><%= if dept.parent, do: dept.parent.name, else: "No Parent" %></td>
@@ -714,7 +870,7 @@ defmodule AiChatWeb.AdminLive do
               </tr>
             </thead>
             <tbody>
-              <tr :for={role <- @roles} id={"role-#{role.id}"}>
+              <tr :for={role <- (@roles || [])} id={"role-#{role.id}"}>
                 <td><%= role.name %></td>
                 <td><%= role.description %></td>
                 <td>
@@ -763,7 +919,7 @@ defmodule AiChatWeb.AdminLive do
               </tr>
             </thead>
             <tbody>
-              <tr :for={prompt <- @prompts} id={"prompt-#{prompt.id}"}>
+              <tr :for={prompt <- (@prompts || [])} id={"prompt-#{prompt.id}"}>
                 <td><%= prompt.title %></td>
                 <td><%= String.slice(prompt.content, 0, 50) %>...</td>
                 <td class="min-w-40">
@@ -837,7 +993,7 @@ defmodule AiChatWeb.AdminLive do
               </tr>
             </thead>
             <tbody>
-              <tr :for={kb <- @knowledge_bases} id={"knowledge-base-#{kb.id}"}>
+              <tr :for={kb <- (@knowledge_bases || [])} id={"knowledge-base-#{kb.id}"}>
                 <td><%= kb.name %></td>
                 <td><%= kb.description %></td>
                 <td>
@@ -904,4 +1060,23 @@ defmodule AiChatWeb.AdminLive do
       role -> role.name
     end
   end
+
+  # Helper functions to generate correct admin paths
+  defp get_new_path("dashboard"), do: ~p"/admin/users/new"
+  defp get_new_path("users"), do: ~p"/admin/users/new"
+  defp get_new_path("departments"), do: ~p"/admin/departments/new"
+  defp get_new_path("roles"), do: ~p"/admin/roles/new"
+  defp get_new_path("prompts"), do: ~p"/admin/prompts/new"
+  defp get_new_path("knowledge-bases"), do: ~p"/admin/knowledge-bases/new"
+  defp get_new_path("ai-apis"), do: ~p"/admin/ai-apis/new"
+  defp get_new_path(_), do: ~p"/admin"
+
+  defp get_index_path("dashboard"), do: ~p"/admin/dashboard"
+  defp get_index_path("users"), do: ~p"/admin/users"
+  defp get_index_path("departments"), do: ~p"/admin/departments"
+  defp get_index_path("roles"), do: ~p"/admin/roles"
+  defp get_index_path("prompts"), do: ~p"/admin/prompts"
+  defp get_index_path("knowledge-bases"), do: ~p"/admin/knowledge-bases"
+  defp get_index_path("ai-apis"), do: ~p"/admin/ai-apis"
+  defp get_index_path(_), do: ~p"/admin"
 end

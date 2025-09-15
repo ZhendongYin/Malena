@@ -40,13 +40,13 @@ docker-compose build
 echo -e "${YELLOW}🚀 Starting services...${NC}"
 docker-compose up -d db redis
 
-# Wait for database to be ready
-echo -e "${YELLOW}⏳ Waiting for database to be ready...${NC}"
-sleep 10
+# Wait for database and redis to be ready
+echo -e "${YELLOW}⏳ Waiting for database and redis to be ready...${NC}"
+sleep 15
 
 # Run database migrations
 echo -e "${YELLOW}📊 Running database migrations...${NC}"
-docker-compose run --rm app ./bin/ai_chat eval "AiChat.Release.migrate()"
+docker-compose run --rm app ./bin/ai_chat eval "Application.ensure_all_started(:ai_chat); Ecto.Migrator.run(AiChat.Repo, :up, all: true)"
 
 # Start the application
 echo -e "${YELLOW}🎯 Starting application...${NC}"
@@ -58,6 +58,7 @@ echo ""
 echo -e "${YELLOW}Useful commands:${NC}"
 echo "  docker-compose logs -f app     # View application logs"
 echo "  docker-compose logs -f db      # View database logs"
+echo "  docker-compose logs -f redis   # View redis logs"
 echo "  docker-compose down            # Stop all services"
 echo "  docker-compose restart app     # Restart application"
 echo ""

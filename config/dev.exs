@@ -86,3 +86,10 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Redis configuration for development
+config :ai_chat, AiChat.Redis,
+  host: "localhost",
+  port: 6380,
+  database: 0,
+  timeout: 5000

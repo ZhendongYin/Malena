@@ -33,6 +33,10 @@ defmodule AiChatWeb.Router do
     post "/register", RegistrationController, :create
   end
 
+  # scope "/api", AiChatWeb do
+  #   pipe_through :api
+  # end
+
   scope "/", AiChatWeb do
     pipe_through [:browser, :auth]
 
@@ -41,13 +45,17 @@ defmodule AiChatWeb.Router do
     # Chat routes - LiveView
     live "/chat", ChatLive, :index
     live "/chat/:id", ChatLive, :show
+
+    # Chat message routes
+    post "/chat/:id/messages", ChatController, :create_message
   end
 
   scope "/admin", AiChatWeb do
     pipe_through [:browser, :auth]
 
-    # LiveView routes for real-time dashboard
-    live "/dashboard", AdminDashboardLive, :index
+    # Admin dashboard
+    live "/", AdminLive, :index
+    live "/dashboard", AdminLive, :index
 
     # User management - Mixed approach
     live "/users", AdminLive, :index  # Keep list as LiveView

@@ -18,105 +18,105 @@
     <.form for={@changeset} action={~p"/register"} method="post" class="mt-8 space-y-6">
       <div class="card bg-base-200 shadow-xl">
         <div class="card-body space-y-4">
-        <div class="form-control">
-          <label for="user_name" class="label">
-            <span class="label-text text-base-content">Full Name</span>
-          </label>
-          <input
-            id="user_name"
-            name="user[name]"
-            type="text"
-            required
-            class="input input-bordered w-full bg-base-100 text-base-content placeholder-base-content/50"
-            placeholder="Enter your full name"
-          />
-          <p :for={msg <- @changeset.errors[:name]} class="text-error text-sm mt-1">
-            <%= elem(msg, 0) %>
-          </p>
-        </div>
+          <div class="form-control">
+            <label for="user_name" class="label">
+              <span class="label-text text-base-content">Full Name</span>
+            </label>
+            <input
+              id="user_name"
+              name="user[name]"
+              type="text"
+              required
+              class="input input-bordered w-full bg-base-100 text-base-content placeholder-base-content/50"
+              placeholder="Enter your full name"
+            />
+            <p :for={msg <- List.wrap(@changeset.errors[:name])} class="text-error text-sm mt-1">
+              <%= elem(msg, 0) %>
+            </p>
+          </div>
 
-        <div class="form-control">
-          <label for="user_email" class="label">
-            <span class="label-text text-base-content">Email Address</span>
-          </label>
-          <input
-            id="user_email"
-            name="user[email]"
-            type="email"
-            autocomplete="email"
-            required
-            class="input input-bordered w-full bg-base-100 text-base-content placeholder-base-content/50"
-            placeholder="Enter your email"
-          />
-          <p :for={msg <- @changeset.errors[:email]} class="text-error text-sm mt-1">
-            <%= elem(msg, 0) %>
-          </p>
-        </div>
+          <div class="form-control">
+            <label for="user_email" class="label">
+              <span class="label-text text-base-content">Email Address</span>
+            </label>
+            <input
+              id="user_email"
+              name="user[email]"
+              type="email"
+              autocomplete="email"
+              required
+              class="input input-bordered w-full bg-base-100 text-base-content placeholder-base-content/50"
+              placeholder="Enter your email"
+            />
+            <p :for={msg <- List.wrap(@changeset.errors[:email])} class="text-error text-sm mt-1">
+              <%= elem(msg, 0) %>
+            </p>
+          </div>
 
-        <div class="form-control">
-          <label for="user_password" class="label">
-            <span class="label-text text-base-content">Password</span>
-          </label>
-          <input
-            id="user_password"
-            name="user[password]"
-            type="password"
-            autocomplete="new-password"
-            required
-            class="input input-bordered w-full bg-base-100 text-base-content placeholder-base-content/50"
-            placeholder="Enter your password"
-          />
-          <p :for={msg <- @changeset.errors[:password]} class="text-error text-sm mt-1">
-            <%= elem(msg, 0) %>
-          </p>
-        </div>
+          <div class="form-control">
+            <label for="user_password" class="label">
+              <span class="label-text text-base-content">Password</span>
+            </label>
+            <input
+              id="user_password"
+              name="user[password]"
+              type="password"
+              autocomplete="new-password"
+              required
+              class="input input-bordered w-full bg-base-100 text-base-content placeholder-base-content/50"
+              placeholder="Enter your password"
+            />
+            <p :for={msg <- List.wrap(@changeset.errors[:password])} class="text-error text-sm mt-1">
+              <%= elem(msg, 0) %>
+            </p>
+          </div>
 
-        <div class="form-control">
-          <label for="user_department_id" class="label">
-            <span class="label-text text-base-content">Department</span>
-          </label>
-          <select
-            id="user_department_id"
-            name="user[department_id]"
-            class="select select-bordered w-full bg-base-100 text-base-content"
-          >
-            <option value="">Select a department</option>
-            <option :for={dept <- @departments} value={dept.id}>
-              <%= dept.name %>
-            </option>
-          </select>
-          <p :for={msg <- @changeset.errors[:department_id]} class="text-error text-sm mt-1">
-            <%= elem(msg, 0) %>
-          </p>
-        </div>
+          <div class="form-control">
+            <label for="user_department_id" class="label">
+              <span class="label-text text-base-content">Department</span>
+            </label>
+            <select
+              id="user_department_id"
+              name="user[department_id]"
+              class="select select-bordered w-full bg-base-100 text-base-content"
+            >
+              <option value="">Select a department</option>
+              <option :for={dept <- @departments} value={dept.id}>
+                <%= dept.name %>
+              </option>
+            </select>
+            <p :for={msg <- List.wrap(@changeset.errors[:department_id])} class="text-error text-sm mt-1">
+              <%= elem(msg, 0) %>
+            </p>
+          </div>
 
-        <div class="form-control">
-          <label for="user_role_id" class="label">
-            <span class="label-text text-base-content">Role</span>
-          </label>
-          <select
-            id="user_role_id"
-            name="user[role_id]"
-            class="select select-bordered w-full bg-base-100 text-base-content"
-          >
-            <option value="">Select a role</option>
-            <option :for={role <- @roles} value={role.id}>
-              <%= role.name %>
-            </option>
-          </select>
-          <p :for={msg <- @changeset.errors[:role_id]} class="text-error text-sm mt-1">
-            <%= elem(msg, 0) %>
-          </p>
-        </div>
-        </div>
+          <div class="form-control">
+            <label for="user_role_id" class="label">
+              <span class="label-text text-base-content">Role</span>
+            </label>
+            <select
+              id="user_role_id"
+              name="user[role_id]"
+              class="select select-bordered w-full bg-base-100 text-base-content"
+            >
+              <option value="">Select a role</option>
+              <option :for={role <- @roles} value={role.id}>
+                <%= role.name %>
+              </option>
+            </select>
+            <p :for={msg <- List.wrap(@changeset.errors[:role_id])} class="text-error text-sm mt-1">
+              <%= elem(msg, 0) %>
+            </p>
+          </div>
 
-        <div class="form-control mt-6">
-          <button
-            type="submit"
-            class="btn btn-primary w-full"
-          >
-            Create Account
-          </button>
+          <div class="form-control mt-6">
+            <button
+              type="submit"
+              class="btn btn-primary w-full"
+            >
+              Create Account
+            </button>
+          </div>
         </div>
       </div>
     </.form>

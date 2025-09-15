@@ -35,3 +35,10 @@ config :phoenix, :plug_init_mode, :runtime
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
+
+# Redis configuration for test (use different database)
+config :ai_chat, AiChat.Redis,
+  host: "localhost",
+  port: 6380,
+  database: 1, # Use database 1 for tests
+  timeout: 5000

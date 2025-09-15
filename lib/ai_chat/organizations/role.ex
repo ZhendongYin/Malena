@@ -11,8 +11,6 @@ defmodule AiChat.Organizations.Role do
     field :is_active, :boolean, default: true
 
     has_many :users, User
-    has_many :prompts, AiChat.Prompts.Prompt
-    has_many :knowledge_bases, AiChat.KnowledgeBases.KnowledgeBase
     has_many :ai_apis, AiChat.AiApis.AiApi
 
     timestamps(type: :utc_datetime)

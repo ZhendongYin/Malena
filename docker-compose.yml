@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build: .
@@ -12,6 +10,9 @@ services:
       - DATABASE_URL=ecto://postgres:password@db:5432/ai_chat_prod
       - SECRET_KEY_BASE=${SECRET_KEY_BASE:-your-secret-key-base-here}
       - PHX_HOST=localhost
+      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       - db
       - redis
@@ -35,10 +36,11 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
 
 volumes:
   postgres_data:

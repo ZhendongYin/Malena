@@ -10,7 +10,8 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     imagemagick \
-    imagemagick-dev
+    imagemagick-dev \
+    curl
 
 # Set environment variables
 ENV MIX_ENV=prod
@@ -26,15 +27,29 @@ RUN mix local.hex --force && \
 # Copy dependency files
 COPY mix.exs mix.lock ./
 
-# Install dependencies
-RUN mix deps.get --only prod && \
+# Install dependencies (including dev deps for asset building)
+RUN mix deps.get && \
     mix deps.compile
 
 # Copy source code
 COPY . .
 
-# Build assets
-RUN mix assets.deploy
+# Clean and reinstall dependencies to ensure consistency
+RUN mix deps.clean --all && \
+    mix deps.get && \
+    mix deps.compile
+
+# Install Tailwind CSS via npm to avoid download issues
+RUN cd assets && \
+    npm install && \
+    cd ..
+
+# Build assets with custom Tailwind script to avoid download issues
+RUN cd assets && \
+    npm run build && \
+    cd .. && \
+    mix esbuild ai_chat --minify && \
+    mix phx.digest
 
 # Compile the application
 RUN mix compile
@@ -50,7 +65,9 @@ RUN apk add --no-cache \
     openssl \
     ncurses-libs \
     imagemagick \
-    bash
+    bash \
+    wget \
+    libstdc++
 
 # Create non-root user
 RUN addgroup -g 1000 -S app && \

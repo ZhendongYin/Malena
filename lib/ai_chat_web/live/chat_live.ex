@@ -142,6 +142,15 @@ defmodule AiChatWeb.ChatLive do
   end
 
   @impl true
+  def handle_event("update_message", %{"message" => message}, socket) do
+    {:noreply, assign(socket, :new_message, message)}
+  end
+
+  def handle_event("update_message", %{"value" => message}, socket) do
+    {:noreply, assign(socket, :new_message, message)}
+  end
+
+  @impl true
   def handle_event("send_message", %{"message" => message_params}, socket) do
     user = socket.assigns.current_user
     conversation = socket.assigns.current_conversation
@@ -170,6 +179,128 @@ defmodule AiChatWeb.ChatLive do
       {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, "No conversation selected")}
+    end
+  end
+
+
+  @impl true
+  def handle_event("handle_enter", %{"key" => "Enter", "ctrlKey" => false}, socket) do
+    # Only send if not loading and message is not empty
+    if not socket.assigns.is_loading and String.trim(socket.assigns.new_message) != "" do
+      handle_event("send_message", %{"message" => %{"content" => socket.assigns.new_message}}, socket)
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("handle_enter", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("delete_conversation", %{"id" => conversation_id}, socket) do
+    case Chat.delete_conversation(conversation_id) do
+      {:ok, _} ->
+        conversations = Chat.list_user_conversations(socket.assigns.current_user.id)
+
+        # Convert conversation_id to integer for comparison
+        conversation_id_int = String.to_integer(conversation_id)
+
+        # If we deleted the current conversation, create a new one
+        socket =
+          if socket.assigns.current_conversation && socket.assigns.current_conversation.id == conversation_id_int do
+            # Create a new conversation
+            user = socket.assigns.current_user
+            conversation_params = %{
+              "title" => "New Chat",
+              "user_id" => user.id
+            }
+
+            case Chat.create_conversation(conversation_params) do
+              {:ok, new_conversation} ->
+                updated_conversations = Chat.list_user_conversations(user.id)
+                socket
+                |> assign(:conversations, updated_conversations)
+                |> assign(:current_conversation, new_conversation)
+                |> assign(:messages, [])
+                |> assign(:is_streaming, false)
+                |> assign(:streaming_content, "")
+                |> assign(:streaming_think_content, "")
+                |> assign(:final_think_content, "")
+                |> assign(:show_think_content, true)
+                |> push_patch(to: ~p"/chat/#{new_conversation.id}")
+              {:error, _} ->
+                socket
+                |> assign(:conversations, conversations)
+                |> assign(:current_conversation, nil)
+                |> assign(:messages, [])
+                |> assign(:is_streaming, false)
+                |> assign(:streaming_content, "")
+                |> assign(:streaming_think_content, "")
+                |> assign(:final_think_content, "")
+                |> assign(:show_think_content, true)
+                |> push_patch(to: ~p"/chat")
+            end
+          else
+            socket
+            |> assign(:conversations, conversations)
+            |> push_patch(to: ~p"/chat")
+          end
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Conversation deleted successfully")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to delete conversation")}
+    end
+  end
+
+  @impl true
+  def handle_event("clear_history", _params, socket) do
+    case socket.assigns.current_conversation do
+      nil -> {:noreply, socket}
+      conversation ->
+        Chat.delete_messages_for_conversation(conversation.id)
+        {:noreply, assign(socket, :messages, [])}
+    end
+  end
+
+  @impl true
+  def handle_event("select_conversation", %{"id" => conversation_id}, socket) do
+    {:noreply, push_patch(socket, to: ~p"/chat/#{conversation_id}")}
+  end
+
+  @impl true
+  def handle_event("rename_conversation", %{"id" => _conversation_id}, socket) do
+    # For now, just show a flash message. In a real app, you might want to show a modal or inline edit
+    {:noreply, put_flash(socket, :info, "Rename functionality coming soon!")}
+  end
+
+  @impl true
+  def handle_event("quick_start", _params, socket) do
+    user = socket.assigns.current_user
+
+    # Create a quick conversation
+    conversation_params = %{
+      "title" => "Quick Start Chat",
+      "user_id" => user.id
+    }
+
+    case Chat.create_conversation(conversation_params) do
+      {:ok, conversation} ->
+        conversations = Chat.list_user_conversations(user.id)
+
+        {:noreply,
+         socket
+         |> assign(:conversations, conversations)
+         |> assign(:current_conversation, conversation)
+         |> assign(:messages, [])
+         |> put_flash(:info, "Quick start conversation created!")
+         |> push_patch(to: ~p"/chat/#{conversation.id}")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to create quick start conversation")}
     end
   end
 
@@ -286,178 +417,6 @@ defmodule AiChatWeb.ChatLive do
          |> assign(:is_loading, false)
          |> put_flash(:error, "Failed to send message")}
     end
-  end
-
-  @impl true
-  def handle_event("update_message", %{"message" => message}, socket) do
-    {:noreply, assign(socket, :new_message, message)}
-  end
-
-  def handle_event("update_message", %{"value" => message}, socket) do
-    {:noreply, assign(socket, :new_message, message)}
-  end
-
-  @impl true
-  def handle_event("handle_enter", %{"key" => "Enter", "ctrlKey" => false}, socket) do
-    # Only send if not loading and message is not empty
-    if not socket.assigns.is_loading and String.trim(socket.assigns.new_message) != "" do
-      handle_event("send_message", %{"message" => %{"content" => socket.assigns.new_message}}, socket)
-    else
-      {:noreply, socket}
-    end
-  end
-
-  @impl true
-  def handle_event("handle_enter", _params, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("delete_conversation", %{"id" => conversation_id}, socket) do
-    case Chat.delete_conversation(conversation_id) do
-      {:ok, _} ->
-        conversations = Chat.list_user_conversations(socket.assigns.current_user.id)
-
-        # Convert conversation_id to integer for comparison
-        conversation_id_int = String.to_integer(conversation_id)
-
-        # If we deleted the current conversation, create a new one
-        socket =
-          if socket.assigns.current_conversation && socket.assigns.current_conversation.id == conversation_id_int do
-            # Create a new conversation
-            user = socket.assigns.current_user
-            conversation_params = %{
-              "title" => "New Chat",
-              "user_id" => user.id
-            }
-
-            case Chat.create_conversation(conversation_params) do
-              {:ok, new_conversation} ->
-                updated_conversations = Chat.list_user_conversations(user.id)
-                socket
-                |> assign(:conversations, updated_conversations)
-                |> assign(:current_conversation, new_conversation)
-                |> assign(:messages, [])
-                |> assign(:is_streaming, false)
-                |> assign(:streaming_content, "")
-                |> assign(:streaming_think_content, "")
-                |> assign(:final_think_content, "")
-                |> assign(:show_think_content, true)
-                |> push_patch(to: ~p"/chat/#{new_conversation.id}")
-              {:error, _} ->
-                socket
-                |> assign(:conversations, conversations)
-                |> assign(:current_conversation, nil)
-                |> assign(:messages, [])
-                |> assign(:is_streaming, false)
-                |> assign(:streaming_content, "")
-                |> assign(:streaming_think_content, "")
-                |> assign(:final_think_content, "")
-                |> assign(:show_think_content, true)
-                |> push_patch(to: ~p"/chat")
-            end
-          else
-            socket
-            |> assign(:conversations, conversations)
-            |> push_patch(to: ~p"/chat")
-          end
-
-        {:noreply,
-         socket
-         |> put_flash(:info, "Conversation deleted successfully")}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to delete conversation")}
-    end
-  end
-
-  @impl true
-  def handle_event("clear_history", _params, socket) do
-    case socket.assigns.current_conversation do
-      nil -> {:noreply, socket}
-      conversation ->
-        Chat.delete_messages_for_conversation(conversation.id)
-        {:noreply, assign(socket, :messages, [])}
-    end
-  end
-
-  @impl true
-  def handle_event("select_conversation", %{"id" => conversation_id}, socket) do
-    {:noreply, push_patch(socket, to: ~p"/chat/#{conversation_id}")}
-  end
-
-  @impl true
-  def handle_event("rename_conversation", %{"id" => _conversation_id}, socket) do
-    # For now, just show a flash message. In a real app, you might want to show a modal or inline edit
-    {:noreply, put_flash(socket, :info, "Rename functionality coming soon!")}
-  end
-
-  @impl true
-  def handle_event("quick_start", _params, socket) do
-    user = socket.assigns.current_user
-
-    # Create a quick conversation
-    conversation_params = %{
-      "title" => "Quick Chat",
-      "user_id" => user.id
-    }
-
-    case Chat.create_conversation(conversation_params) do
-      {:ok, conversation} ->
-        conversations = Chat.list_user_conversations(user.id)
-
-        {:noreply,
-         socket
-         |> assign(:conversations, conversations)
-         |> put_flash(:info, "Quick conversation started!")
-         |> push_patch(to: ~p"/chat/#{conversation.id}")}
-
-      {:error, _changeset} ->
-        {:noreply, put_flash(socket, :error, "Failed to start conversation")}
-    end
-  end
-
-  # Generate a conversation title from the first message
-  defp generate_conversation_title(message) do
-    # Simple title generation - take first 50 characters and clean up
-    message
-    |> String.trim()
-    |> String.replace(~r/\s+/, " ")
-    |> String.slice(0, 50)
-    |> then(fn title ->
-      if String.length(title) == 50 do
-        title <> "..."
-      else
-        title
-      end
-    end)
-  end
-
-  # Start streaming response
-  defp start_streaming_response(socket, conversation, updated_messages) do
-    # Create a temporary AI message for streaming
-    temp_ai_message = %{
-      id: "temp_ai_#{System.unique_integer([:positive])}",
-      role: "assistant",
-      content: "",
-      conversation_id: conversation.id,
-      inserted_at: DateTime.utc_now(),
-      updated_at: DateTime.utc_now()
-    }
-
-    # Add temp message to the messages list
-    messages_with_temp = updated_messages ++ [temp_ai_message]
-
-    {:noreply,
-     socket
-     |> assign(:messages, messages_with_temp)
-     |> assign(:is_loading, false)
-     |> assign(:is_streaming, true)
-     |> assign(:streaming_content, "")
-     |> assign(:streaming_think_content, "")
-     |> assign(:final_think_content, "")
-     |> assign(:show_think_content, true)
-     |> assign(:temp_ai_message_id, temp_ai_message.id)}
   end
 
   # Handle streaming think content
@@ -612,9 +571,47 @@ defmodule AiChatWeb.ChatLive do
     {:noreply, socket}
   end
 
-  @impl true
-  def handle_info(%HTTPoison.AsyncEnd{}, socket) do
-    {:noreply, socket}
+  # Generate a conversation title from the first message
+  defp generate_conversation_title(message) do
+    # Simple title generation - take first 50 characters and clean up
+    message
+    |> String.trim()
+    |> String.replace(~r/\s+/, " ")
+    |> String.slice(0, 50)
+    |> then(fn title ->
+      if String.length(title) == 50 do
+        title <> "..."
+      else
+        title
+      end
+    end)
+  end
+
+  # Start streaming response
+  defp start_streaming_response(socket, conversation, updated_messages) do
+    # Create a temporary AI message for streaming
+    temp_ai_message = %{
+      id: "temp_ai_#{System.unique_integer([:positive])}",
+      role: "assistant",
+      content: "",
+      conversation_id: conversation.id,
+      inserted_at: DateTime.utc_now(),
+      updated_at: DateTime.utc_now()
+    }
+
+    # Add temp message to the messages list
+    messages_with_temp = updated_messages ++ [temp_ai_message]
+
+    {:noreply,
+     socket
+     |> assign(:messages, messages_with_temp)
+     |> assign(:is_loading, false)
+     |> assign(:is_streaming, true)
+     |> assign(:streaming_content, "")
+     |> assign(:streaming_think_content, "")
+     |> assign(:final_think_content, "")
+     |> assign(:show_think_content, true)
+     |> assign(:temp_ai_message_id, temp_ai_message.id)}
   end
 
 end
